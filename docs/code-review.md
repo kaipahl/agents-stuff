@@ -15,8 +15,9 @@ Give each sub-task sufficient informations for a correct evaluation, including t
 Each sub-task should:
 - read the file
 - not make any assumptions about other files without having read the file
-- check if the findings are real problems compared to the scope or only theoretical problems. If you don't have any solid proofs for problems, ignore theoretical problems as findings.
-- list findings by severity (critical/warning/suggestion),
+- check if the findings are real problems compared to the scope or only theoretical problems. If you don't have any solid proofs for problems, ignore theoretical problems as findings
+- check if the documentation for the scope of the sub-task is correct or needs improvements
+- list findings by severity (critical/warning/suggestion)
 - include code snippets.
 
 After all sub-tasks complete, consolidate into a single review report at ./.reviews/review-claude-YYYY-MM-DD.md with a summary table and detailed findings sorted by severity.
