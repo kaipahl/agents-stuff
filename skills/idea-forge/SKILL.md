@@ -80,6 +80,7 @@ Identifiziere Risiken, die nicht auf der Oberfläche liegen. Regulatorische Hür
 - ⚠️ Lästig, aber lösbar
 - 🚧 Ernsthaft — braucht eine Strategie
 - 🛑 Potentiell fatal — muss VOR dem Start geklärt werden
+- 
 #### Chancen
 Wo gibt es versteckte Vorteile, die der User wahrscheinlich noch nicht sieht? Netzwerkeffekte, regulatorische Schlupflöcher, Timing-Vorteile, Second-Order-Effects?
 
@@ -95,6 +96,7 @@ Entwickle 3-5 konkrete Varianten oder Ausbaustufen der Idee. Jede Variante bekom
 - **Geschäftsmodell-Skizze**: Wie verdient man damit Geld?
 - **Validierungsstrategie**: Wie testet man das BEVOR man viel investiert? (Lean-Ansatz)
 - **Größte Schwäche**: Was ist die Achillesferse dieser Variante?
+
 ### 6. Validierung der Vorschläge
 
 Bewerte jeden Vorschlag entlang dieser Achsen:
@@ -115,7 +117,11 @@ Das ist der wichtigste Abschnitt. Sei direkt, aber respektvoll. Beantworte:
 - Gibt es einen Confirmation Bias beim Ideengeber?
   Formuliere das nicht als Demotivation, sondern als Risikobewusstsein. Das Ziel ist, dass der User die Fallstricke JETZT kennt, nicht erst nach 6 Monaten Arbeit.
 
-### 8. Empfehlung
+### 8. Der Blick in die Zukunft
+
+In sechs Monaten wird die Idee gescheitert sein. Erkläre warum und woran die Idee gescheitert ist.
+
+### 9. Empfehlung
 
 Mache eine klare Empfehlung:
 - Welche Variante empfiehlst du und warum?
