@@ -2,7 +2,7 @@
 name: td-implementation
 description: Ein Issue des TD-Boards soll umgesetzt werden.
 ---
-Wir sind im Workflow nach TD – Task Management for AI Agents.
+Wir sind im Workflow nach TD – Task Management for AI Agents (see: Skill "td-task-management").
 Kümmere dich um das angegebene Issue. Nehme keine weiteren Issues dazu!
 
 Führe die Umsetzungen durch nach:
