@@ -1,6 +1,6 @@
 ---
 name: td-implementation-worksession
-description: Alle Issues einer offenen TD-Worksession sollen umgesetzt werden.
+description: Alle Issues einer offenen TD-Worksession (siehe Skill `td-task-management`) sollen umgesetzt werden.
 ---
 Wir sind im Workflow nach TD – Task Management for AI Agents.
 Es ist eine Work Session offen. Kümmere dich um alle Issues aus der Work Session. Nehme keine weiteren Issues dazu!

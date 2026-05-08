@@ -1,8 +1,8 @@
 ---
 name: td-fix-rejected-review
-description: Eine Implementierung wurde auf Basis des TD-Workflows nach Code-Review rejected. Die Rejection soll evaluiert und, wenn berechtigt, die Implementierung gefixt werden.
+description: Eine Implementierung wurde auf Basis des TD-Workflows (siehe Skill `td-task-management`) nach Code-Review rejected. Die Rejection soll evaluiert und, wenn berechtigt, die Implementierung gefixt werden.
 ---
-Issues wurden in der Code-Review rejected. Gemäß dem TD-Workflow (see: Skill "td-task-management") sind die Gründe für die Rejection am Issue hinterlegt.
+Issues wurden in der Code-Review rejected. Gemäß dem TD-Workflow sind die Gründe für die Rejection am Issue hinterlegt.
 
 Führe eine ehrliche Bewertung der Rejection durch. 
 

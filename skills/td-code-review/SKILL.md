@@ -1,6 +1,6 @@
 ---
 name: td-code-review
-description: Führe im Rahmen des TD-Workflows eine Code-Review der zur Review stehenden TD-Issues durch.
+description: Führe im Rahmen des TD-Workflows (siehe Skill `td-task-management`) eine Code-Review der zur Review stehenden TD-Issues durch.
 ---
 Ich will eine Code-Review nach td – Task Management for AI Agents. Es warten Issues auf eine Review.
 Führe eine ehrliche Code-Review durch und evaluiere die Umsetzung nach
