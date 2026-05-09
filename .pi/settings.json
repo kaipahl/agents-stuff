@@ -1,0 +1,29 @@
+{
+  "lastChangelogVersion": "0.73.0",
+  "defaultProvider": "openrouter",
+  "defaultModel": "moonshotai/kimi-k2.6",
+  "defaultThinkingLevel": "high",
+  "showHardwareCursor": true,
+  "hideThinkingBlock": false,
+  "editorPaddingX": 2,
+  "retry": {
+    "enabled": true,
+    "maxRetries": 3,
+    "baseDelayMs": 2000,
+    "provider": {
+      "maxRetryDelayMs": 60000
+    }
+  },
+  "enabledModels": [
+    "deepseek/deepseek-v3.2",
+    "deepseek/deepseek-v4-pro",
+    "deepseek/deepseek-v4-flash",
+    "minimax/minimax-m2.7",
+    "z-ai/glm-5.1",
+    "moonshotai/kimi-k2.6",
+    "google/gemma-4-31b-it"
+  ],
+  "packages": [
+    "npm:pi-web-access"
+  ]
+}
