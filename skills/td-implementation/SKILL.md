@@ -1,22 +1,21 @@
 ---
 name: td-implementation
-description: Ein Issue des TD-Boards (siehe Skill `td-task-management`) soll umgesetzt werden.
+description: Implement issues of the TD board
 ---
-Wir sind im Workflow nach TD – Task Management for AI Agents.
-Kümmere dich um das angegebene Issue. Nehme keine weiteren Issues dazu!
+**Critical**: you must know the content of `td-task-management` and follow the TD-workflow.
 
-Führe die Umsetzungen durch nach:
-- Coding Standards
-- Best Practices
-- Lesbarkeit
-- Klarheit
-- Robustheit
-- Projektdokumentation und Implementation-Pläne
+For TD implementation standards see [td-implementation-standards.md](../td-shared/td-implementation-standards.md)
 
-Leite nicht blind von den Architektur-Intentionen ab. Führe keine Annahmen über Code und Dateien durch, ohne sie explizit geprüft zu haben.
+Work **only** on {all issues of the open TD Work Session | the mentioned TD issue}. **Do not add or work on any additional issues.**
 
-Denke daran, bei Änderungen ggf. auch die Dokumentation anzupassen.
-
-Prüfe ob im Rahmen des Scopes des Issues die Änderungen weitere Stellen betreffen außerhalb der explizit im Issue genannten Stelle.
-
-Wenn dir im Rahmen der Implementierung mögliche Improvements außerhalb des Scopes des Issues auffallen (Performanceverbesserung, mögliches Refactoring, Verbesserung der Architektur), dann teile sie mir mit. Gib mir eine Entscheidungsvorlage, um dich daraus neue Issues in TD anlegen zu lassen.
+1. Analyze: Read all information and acceptance criteria in the specified TD issue.
+2. Explore: If the issue spans multiple files or the scope is unclear, deploy a small subagent (e.g., the Explore subagent using "Haiku") for codebase exploration before writing code.
+3. Initialize: Start the implementation by running `td start <issue-id>`
+4. Test-Driven Development: Evaluate if additional tests are required by TDD. If yes, implement these tests before changing any production code.
+5. Scope: Search ALL call sites and emission sites — do not stop at the first match.
+6. Documentation: Update inline docs AND markdown docs to match new semantics
+7. Verification (Criteria): Verify explicitly that every acceptance criterion of the issue is fully fulfilled.
+8. Verification (Tools): Run `npm run lint && npm run typecheck && npm test`. ** If any command fails, fix the errors and repeat this step before proceeding.**
+9. Log: Document your implementation details via `td log <issue-id>`. Communication is a critical part of the implementation (see [td-communication.md](../td-shared/td-communication.md))!
+10. Handoff: Hand over with `td handoff`.
+11. Submit: Only then submit for review via `td review <issue-id>`. **Critical**: Never close the issue yourself!

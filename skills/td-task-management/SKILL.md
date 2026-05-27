@@ -120,66 +120,7 @@ td context td-a1b2  # Refresh context when blocker resolves
 
 ## Commands by Category
 
-### Checking Status
-- `td usage` - Current state, reviews, next steps
-- `td usage -q` - Compact view (after first read)
-- `td current` - What you're working on
-- `td ws current` - Current work session state
-- `td next` - Highest priority open
-- `td critical-path` - What unblocks most work
-
-### Working on Issues
-- `td start <id>` - Begin work
-- `td unstart <id>` - Revert to open (undo accidental start)
-- `td log "msg"` - Track progress
-- `td log --decision "..."` - Log decision
-- `td log --blocker "..."` - Log blocker
-- `td show <id>` - View details
-- `td context <id>` - Full context for resuming
-
-### Handing Off
-- `td handoff <id> --done "..." --remaining "..."` - Single issue
-- `td ws handoff` - Multi-issue work session
-
-### Reviews
-- `td review <id>` - Submit for review
-- `td reviewable` - Issues you can review
-- `td approve <id>` - Approve (different session only)
-- `td reject <id> --reason "..."` - Reject
-
-### Creating/Managing Issues
-- `td create "title" --type feature --priority P1` - Create
-- `td create "title" --description-file body.md --acceptance-file acceptance.md` - Agent-safe rich text
-- `cat body.md | td update <id> --append --description-file -` - Append rich text from stdin
-- `td list` - List all
-- `td list --status in_progress` - Filter by status
-- `td block <id>` - Mark as blocked
-- `td delete <id>` - Delete
-
-### File Tracking
-- `td link <id> <files...>` - Track files with issue
-- `td files <id>` - Show file changes
-
-### Other
-- `td monitor` - Live dashboard
-- `td session --new "name"` - Force new session
-- `td undo` - Undo last action
-
 See [quick_reference.md](references/quick_reference.md) for full command listing.
-
-## Resources
-
-### [quick_reference.md](references/quick_reference.md)
-Complete command reference organized by task type.
-
-### [ai_agent_workflows.md](references/ai_agent_workflows.md)
-Detailed workflows for common AI agent scenarios:
-- Single-issue focus
-- Multi-issue work sessions
-- Handling blockers
-- Resuming work
-- Code review process
-- Tips for AI agents
 
 ## Issue Lifecycle
 
@@ -213,5 +154,3 @@ This auto-rotates sessions and gives you current state. Then:
 4. **Log decisions** → Use `--decision` flag to explain reasoning
 5. **Log uncertainty** → Use `--uncertain` flag to mark unknowns
 6. **Track files** → Use `td link` so future sessions know what changed
-
-See [ai_agent_workflows.md](references/ai_agent_workflows.md) for detailed examples.

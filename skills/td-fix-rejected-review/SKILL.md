@@ -1,11 +1,22 @@
 ---
 name: td-fix-rejected-review
-description: Eine Implementierung wurde auf Basis des TD-Workflows (siehe Skill `td-task-management`) nach Code-Review rejected. Die Rejection soll evaluiert und, wenn berechtigt, die Implementierung gefixt werden.
+description: Address a rejected TD review systematically. Evaluate the rejection and if agreeing, fix the implementation.
 ---
-Issues wurden in der Code-Review rejected. Gemäß dem TD-Workflow sind die Gründe für die Rejection am Issue hinterlegt.
+**Critical**: you must know the content of `td-task-management` and follow the TD-workflow.
 
-Führe eine ehrliche Bewertung der Rejection durch. 
+For TD implementation standards see [td-implementation-standards.md](../td-shared/td-implementation-standards.md)
 
-Wenn du nach der Bewertung der Ansicht bist, dass die Rejection berechtigt ist, dann fixe den Code – befolge dabei die Prozeduren des TD-Workflows! Teile mir dann mit, ob am Prompting etwas verbessert werden kann, damit es nicht passiert. 
-
-Wenn du der Ansicht bist, die Rejection ist nicht berechtigt, teile mir deine Begründung mit.
+1. Read the full rejection comment on the mentioned TD issue
+2. Identify root cause category (logic / docs / tests / lint)
+3. Evaluate honestly if the rejection was reasonable.
+    - If yes: Proceed to step 4.
+    - If no: Halt execution, present your counter-argument to the user, and wait for explicit approval to proceed.
+4. Start the fix by running `td start <issue-id>`
+5. Search ALL call sites / emission sites — do not stop at the first match.
+6. Update inline docs AND markdown docs to match new semantics
+7. Add a regression test specifically covering the rejection case.
+8. Run verification tools: `npm run lint && npm run typecheck && npm test`
+9. Ask yourself why the issue was rejected and what could have avoided the rejection. Tell the user.
+10. Document your fixes via `td log <issue-id>`. Communication is a critical part of the implementation (see [td-communication.md](../td-shared/td-communication.md))!
+11. Hand over with `td handoff`.
+12. Only then re-submit via `td review <issue-id>`. **Critical**: Never close the issue yourself!

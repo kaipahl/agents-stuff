@@ -3,7 +3,7 @@
 ## Common Commands
 
 ### Getting Started
-- `td usage` - See current state, pending reviews, and next steps
+- `td usage <id>` - See current state, pending reviews, and next steps
 - `td usage -q` - Compact view (use after first read)
 - `td init` - Initialize td in a new project
 
