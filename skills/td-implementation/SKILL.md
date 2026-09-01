@@ -15,7 +15,7 @@ Work **only** on {all issues of the open TD Work Session | the mentioned TD issu
 5. Scope: Search ALL call sites and emission sites — do not stop at the first match.
 6. Documentation: Update inline docs AND markdown docs to match new semantics
 7. Verification (Criteria): Verify explicitly that every acceptance criterion of the issue is fully fulfilled.
-8. Verification (Tools): Run `npm run lint && npm run typecheck && npm test`. ** If any command fails, fix the errors and repeat this step before proceeding.**
+8. Verification (Tools): Do linting or type check or other test tools exist? Then run them. **If any command fails, fix the errors and repeat this step before proceeding.**
 9. Log: Document your implementation details via `td log <issue-id>`. Communication is a critical part of the implementation (see [td-communication.md](../td-shared/td-communication.md))!
 10. Handoff: Hand over with `td handoff`.
 11. Submit: Only then submit for review via `td review <issue-id>`. **Critical**: Never close the issue yourself!

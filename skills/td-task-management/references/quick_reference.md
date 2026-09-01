@@ -3,8 +3,8 @@
 ## Common Commands
 
 ### Getting Started
-- `td usage <id>` - See current state, pending reviews, and next steps
-- `td usage -q` - Compact view (use after first read)
+- `td usage --new-session -q` - Start a new agent context with compact current state
+- `td usage` - See current state with workflow guidance
 - `td init` - Initialize td in a new project
 
 ### Single-Issue Workflow
@@ -13,9 +13,12 @@
 - `td log "message"` - Track progress
 - `td log --decision "chose X because Y"` - Log a decision
 - `td log --blocker "stuck on X"` - Log a blocker
-- `td handoff <id> --done "..." --remaining "..."` - Capture state before context ends
+- `td handoff <id> --done "..." --remaining "..." --decision "..." --uncertain "..."` - Capture state for another context
 - `td review <id>` - Submit for review
-- `td approve <id>` - Approve (different session only)
+- `td approve <id> --reason "..."` - Approve an independent review
+- `td approve <id> --reviewed-by "<who>"` - Credit whoever reviewed it (trusted mode)
+- `td approve <id> --self-review --reason "..."` - Record a trusted-mode self-review
+- `td approve <id> --record-only --reason "..."` - Attest without closing; any session closes after
 - `td reject <id> --reason "..."` - Reject back to author
 
 ### Multi-Issue Workflow
@@ -34,20 +37,22 @@
 - `td list --status in_progress` - Filter by status
 - `td show <id>` - View issue details
 - `td next` - Highest priority open issue
+- `td current` - What you're working on
+- `td context <id>` - Full context for resuming
 - `td critical-path` - What unblocks the most work
 - `td reviewable` - Issues you can review
+- `td block <id>` - Mark issue as blocked
+- `td delete <id>` - Delete issue
 
 ### File Tracking
 - `td link <id> <files...>` - Track files with an issue
 - `td files <id>` - Show file changes (modified, new, deleted, unchanged)
 
 ### Other
-- `td context <id>` - Full context for resuming
+- `td usage -q` - Compact current state
 - `td monitor` - Live dashboard of activity
 - `td session --new "name"` - Force new named session
 - `td undo` - Undo last action
-- `td block <id>` - Mark issue as blocked
-- `td delete <id>` - Delete issue
 
 ## Issue Statuses
 
@@ -60,8 +65,8 @@ open → in_progress → in_review → closed
 
 ## Key Concepts
 
-**Sessions** - Every terminal/context gets an auto ID. Session that starts work ≠ session that reviews.
+**Sessions** - Every terminal/context gets an auto ID so implementation and review remain attributable.
 
 **Work Sessions (ws)** - Optional container for grouping related issues. Useful for agents handling multiple issues.
 
-**Handoffs** - Critical for agent handoffs. Use `--done`, `--remaining`, `--decision`, `--uncertain` to pass structured state.
+**Handoffs** - Use `--done`, `--remaining`, `--decision`, and `--uncertain` when another context will continue the work.

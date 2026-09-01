@@ -1,27 +1,28 @@
 ---
 name: td-code-review
-description: Führe im Rahmen des TD-Workflows eine Code-Review der zur Review stehenden TD-Issues durch.
+description: Conduct a code review of the TD issues pending review as part of the TD workflow.
 ---
-Ich will eine Code-Review nach TD – Task Management for AI Agents (**critical**: you must know the content of `td-task-management`). Es warten Issues auf eine Review.
+I want a code review with the "td - Task Management for AI Agents" workflow (**critical**: you must know the content of `td-task-management`). There are issues waiting for a review.
 
 See [td-implementation-standards.md](../td-shared/td-implementation-standards.md) for the implementation standards in TD-workflows.
 
-Wenn du es für sinnvoll hältst, setze Subagenten ein:
-- _Codebase Explorer_ für Code/Doku. Liest gezielt betroffene Dateien, Nachbarschaftscode und Doku/
-  Plan, meldet nur belegte Risiken
-- _Test Reviewer_ für Coverage. Prüft Acceptance Criteria gegen Tests, Randfälle, Regressionen und ob der richtige Check gelaufen ist.
-- _Integration Reviewer_: nur bei größeren Tickets; schaut auf Persistenz/API/UI/Runner-
-  Verkettung und mögliche Seiteneffekte
-- **Du** integrierst und entscheidest.
+When practical, use subagents for code reviews.
 
-## Bei Problemen
+- _Codebase Explorer_ for code/docs. Reads specifically the affected files, neighboring code, and docs/plan, reports only evidenced risks
+- _Test Reviewer_ for coverage. Checks acceptance criteria against tests, edge cases, regressions, and whether the correct check was run.
+- _Integration Reviewer_: only for larger tickets; looks at persistence/API/UI/runner chaining and possible side effects
+- **You** integrate and decide.
 
-Bewerte ob die Probleme die du findest, nur theoretischer Natur sind. Wenn du keine Beweise für diese Probleme hast, dann ignoriere die theoretischen Probleme.
+## When issues arise
 
-Wenn du Probleme findest, steht es dir frei, das Issue zu "rejecten". Wenn du die Umsetzungen als ausreichend bewertest, kannst du ein Approval geben.
+Assess whether the issues you find are purely theoretical. If you have no evidence for these issues, then ignore the theoretical issues.
 
-## Mögliche Follow-Up-Issues
+If you find issues, you are free to "reject" the issue. If you assess the implementation as sufficient, you can give an approval.
 
-Wenn dir im Rahmen der Implementierung mögliche Improvements außerhalb des Scopes des Issues auffallen (Performanceverbesserung, mögliches Refactoring, Verbesserung der Architektur), dann mache für jedes mögliche Improvement am Issue je ein `td log`. Die Log-Message beginnt mit "Possible new issue:" und dahinter folgt deine Entscheidungsvorlage damit im Projekt später evaluiert werden kann, ob daraus ein neues Issue angelegt wird.
 
-Am Ende der Code-Review wende den Skill `td-create-follow-up-issue <issue-id>` an.
+## Possible Follow-Up Issues
+
+If, as part of the implementation, you notice possible improvements outside the scope of the issue (performance improvement, possible refactoring, architecture improvement), create a separate `td log` for each possible improvement on the issue. The log message begins with "Possible new issue:" followed by your decision template, so that the project can later evaluate whether a new issue should be created from it.
+
+At the end of the code review, apply the skill `td-create-follow-up-issue <issue-id>`.
+
