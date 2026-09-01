@@ -1,0 +1,266 @@
+#!/usr/bin/env bash
+#
+# skills-inventory — find every copy of every agent skill and show which
+# copies have diverged.
+#
+# Spotlight does not index anything inside a dot-directory, so .claude/skills,
+# .agents/skills et al. are invisible to Finder, HoudahSpot and Alfred. This
+# walks the filesystem instead.
+#
+# A "skill" is any directory containing a SKILL.md. Two copies are the same
+# variant when the whole directory hashes identically (all files, not just
+# SKILL.md).
+#
+# Full run: 50sec, Single-Skill query: 14s
+#
+
+set -u
+
+VERSION="1.0.0"
+TAB=$(printf '\t')
+
+DEFAULT_ROOTS="$HOME/sites $HOME/.claude/skills $HOME/.agents"
+PRUNE_NAMES="node_modules .git vendor dist build .next .venv __pycache__"
+
+name_filter=""
+only_diverged=0
+as_json=0
+list_paths=1
+diff_skill=""
+roots=""
+
+usage() {
+	cat <<'HELP_EOF'
+skills-inventory — inventory every agent skill copy on disk, flag divergence.
+
+  skills-inventory [options] [root...]
+
+OPTIONS
+  -n, --name <substr>   only skills whose name contains <substr>
+  -d, --diverged        only report skills that have more than one variant
+  -s, --summary         one line per skill, no paths
+  -j, --json            emit JSON
+  -D, --diff <skill>    unified diff between the variants of one skill
+  -v, --version         print version
+  -h, --help            this text
+
+ROOTS
+  Defaults to ~/sites ~/.claude/skills ~/.agents
+  Pruned while walking: node_modules .git vendor dist build .next .venv
+
+EXAMPLES
+  skills-inventory                          # full inventory
+  skills-inventory -d                       # only what has drifted
+  skills-inventory -n td-task-management    # one skill, every copy
+  skills-inventory -D td-task-management    # what actually differs
+  skills-inventory -j | jq -r '.[] | select(.diverged) | .name'
+HELP_EOF
+}
+
+while [ $# -gt 0 ]; do
+	case "$1" in
+		-n|--name)     name_filter="${2:-}"; shift 2 ;;
+		-d|--diverged) only_diverged=1; shift ;;
+		-s|--summary)  list_paths=0; shift ;;
+		-j|--json)     as_json=1; shift ;;
+		-D|--diff)     diff_skill="${2:-}"; shift 2 ;;
+		-v|--version)  echo "skills-inventory $VERSION"; exit 0 ;;
+		-h|--help)     usage; exit 0 ;;
+		-*)            echo "skills-inventory: unknown option $1" >&2; usage >&2; exit 2 ;;
+		*)             roots="$roots $1"; shift ;;
+	esac
+done
+
+case "$roots" in *[!\ ]*) ;; *) roots="$DEFAULT_ROOTS" ;; esac
+
+# --diff only ever reports on one skill; don't hash the whole tree for it
+[ -n "$diff_skill" ] && [ -z "$name_filter" ] && name_filter="$diff_skill"
+
+# --- colors (only when writing to a terminal) --------------------------------
+if [ -t 1 ] && [ "$as_json" -eq 0 ]; then
+	BOLD=$'\033[1m'; DIM=$'\033[2m'; RED=$'\033[31m'
+	GRN=$'\033[32m'; YEL=$'\033[33m'; RST=$'\033[0m'
+else
+	BOLD=""; DIM=""; RED=""; GRN=""; YEL=""; RST=""
+fi
+
+tmp=$(mktemp -d "${TMPDIR:-/tmp}/skills-inventory.XXXXXX") || exit 1
+trap 'rm -rf "$tmp"' EXIT
+
+tilde() { case "$1" in "$HOME"/*) printf '~%s' "${1#$HOME}" ;; *) printf '%s' "$1" ;; esac; }
+
+# A skill's identity hash is a manifest of "<sha256>  <relpath>" for every file
+# in it, byte-sorted then hashed. Relative paths keep it location-independent;
+# including the paths makes it sensitive to added/removed/renamed files, not
+# just edited ones. One shasum and one stat process per skill, not per file.
+
+# --- collect ------------------------------------------------------------------
+prune_expr=""
+for p in $PRUNE_NAMES; do
+	prune_expr="$prune_expr -name $p -o"
+done
+prune_expr="${prune_expr% -o}"
+
+: > "$tmp/raw.tsv"
+found_root=0
+for root in $roots; do
+	[ -d "$root" ] || continue
+	found_root=1
+	# shellcheck disable=SC2086
+	find "$root" \( $prune_expr \) -prune -o -type f -name 'SKILL.md' -print0 2>/dev/null \
+		| while IFS= read -r -d '' skillmd; do
+			dir=$(dirname "$skillmd")
+			name=$(basename "$dir")
+			case "$name" in
+				*"$name_filter"*) ;;
+				*) continue ;;
+			esac
+			( cd "$dir" 2>/dev/null && find . -type f \
+				! -name '.DS_Store' ! -path './.git/*' -print0 ) > "$tmp/f.z" 2>/dev/null
+			nfiles=$(tr -cd '\0' < "$tmp/f.z" | wc -c | tr -d ' ')
+			[ "$nfiles" -gt 0 ] || continue
+			h=$( ( cd "$dir" && xargs -0 -r shasum -a 256 < "$tmp/f.z" 2>/dev/null ) \
+				| LC_ALL=C sort | shasum -a 256 | cut -c1-12 )
+			stats=$( ( cd "$dir" && xargs -0 -r stat -f '%z %m' < "$tmp/f.z" 2>/dev/null ) \
+				| awk '{s+=$1; if ($2>m) m=$2} END{print s+0"\t"m+0}' )
+			bytes=${stats%%$TAB*}
+			mtime=${stats##*$TAB}
+			printf '%s\t%s\t%s\t%s\t%s\t%s\n' \
+				"$name" "$h" "$mtime" "$nfiles" "$bytes" "$dir" >> "$tmp/raw.tsv"
+		done
+done
+
+if [ "$found_root" -eq 0 ]; then
+	echo "skills-inventory: no readable roots in:$roots" >&2
+	exit 1
+fi
+if [ ! -s "$tmp/raw.tsv" ]; then
+	echo "skills-inventory: no SKILL.md found under:$roots" >&2
+	exit 1
+fi
+
+# name asc, then hash grouped, newest copy first inside each hash group
+LC_ALL=C sort -t"$TAB" -k1,1 -k2,2 -k3,3nr "$tmp/raw.tsv" > "$tmp/sorted.tsv"
+
+# --- --diff mode --------------------------------------------------------------
+if [ -n "$diff_skill" ]; then
+	awk -F'\t' -v want="$diff_skill" '$1==want' "$tmp/sorted.tsv" > "$tmp/one.tsv"
+	if [ ! -s "$tmp/one.tsv" ]; then
+		echo "skills-inventory: no skill named '$diff_skill'" >&2
+		exit 1
+	fi
+	awk -F'\t' '!seen[$2]++ {print $2"\t"$6}' "$tmp/one.tsv" > "$tmp/reps.tsv"
+	nvar=$(wc -l < "$tmp/reps.tsv" | tr -d ' ')
+	if [ "$nvar" -le 1 ]; then
+		printf '%s%s%s — all %s copies identical, nothing to diff.\n' \
+			"$GRN" "$diff_skill" "$RST" "$(wc -l < "$tmp/one.tsv" | tr -d ' ')"
+		exit 0
+	fi
+	base_hash=$(head -1 "$tmp/reps.tsv" | cut -f1)
+	base_path=$(head -1 "$tmp/reps.tsv" | cut -f2)
+	printf '%s%s%s — %s variants, each diffed against the newest\n' \
+		"$BOLD" "$diff_skill" "$RST" "$nvar"
+	printf '%sbase %s  %s%s\n\n' "$DIM" "$base_hash" "$(tilde "$base_path")" "$RST"
+	tail -n +2 "$tmp/reps.tsv" | while IFS="$TAB" read -r h p; do
+		printf '%s── %s  %s%s\n' "$YEL" "$h" "$(tilde "$p")" "$RST"
+		diff -ru --label "$base_hash" --label "$h" "$base_path" "$p" 2>/dev/null
+		echo
+	done
+	exit 0
+fi
+
+# --- JSON mode ----------------------------------------------------------------
+if [ "$as_json" -eq 1 ]; then
+	awk -F'\t' '
+	function esc(s) { gsub(/\\/, "\\\\", s); gsub(/"/, "\\\"", s); return s }
+	function flush_skill(   i) {
+		if (name == "") return
+		printf "%s{\"name\":\"%s\",\"copies\":%d,\"variants\":%d,\"diverged\":%s,\"groups\":[",
+			(first ? "" : ","), esc(name), copies, nvar, (nvar > 1 ? "true" : "false")
+		for (i = 1; i <= nvar; i++)
+			printf "%s{\"hash\":\"%s\",\"newest\":%d,\"files\":%d,\"bytes\":%d,\"paths\":[%s]}",
+				(i > 1 ? "," : ""), vhash[i], vnewest[i], vfiles[i], vbytes[i], vpaths[i]
+		printf "]}"
+		first = 0
+	}
+	BEGIN { printf "["; first = 1; name = "" }
+	{
+		if ($1 != name) { flush_skill(); name = $1; copies = 0; nvar = 0 }
+		copies++
+		# key on name+hash so indices never leak between skills
+		k = name SUBSEP $2
+		if (!(k in vidx)) {
+			nvar++; vidx[k] = nvar
+			vhash[nvar] = $2; vnewest[nvar] = $3; vfiles[nvar] = $4
+			vbytes[nvar] = $5; vpaths[nvar] = ""
+		}
+		i = vidx[k]
+		if ($3 > vnewest[i]) vnewest[i] = $3
+		vpaths[i] = vpaths[i] (vpaths[i] == "" ? "" : ",") "\"" esc($6) "\""
+	}
+	END { flush_skill(); printf "]\n" }
+	' "$tmp/sorted.tsv"
+	exit 0
+fi
+
+# --- human report -------------------------------------------------------------
+human_bytes() {
+	awk -v b="$1" 'BEGIN{
+		split("B KB MB GB", u, " "); i = 1
+		while (b >= 1024 && i < 4) { b /= 1024; i++ }
+		printf (i == 1 ? "%d%s" : "%.1f%s"), b, u[i]
+	}'
+}
+
+awk -F'\t' '
+	{ copies[$1]++; if (!seen[$1 SUBSEP $2]++) variants[$1]++ }
+	END { for (n in copies) printf "%s\t%d\t%d\n", n, copies[n], variants[n] }
+' "$tmp/sorted.tsv" | LC_ALL=C sort > "$tmp/counts.tsv"
+
+total_skills=0; total_copies=0; total_diverged=0
+[ "$list_paths" -eq 1 ] && gap=$'\n' || gap=""
+while IFS="$TAB" read -r name copies variants; do
+	total_skills=$((total_skills + 1))
+	total_copies=$((total_copies + copies))
+	[ "$variants" -gt 1 ] && total_diverged=$((total_diverged + 1))
+	if [ "$only_diverged" -eq 1 ] && [ "$variants" -le 1 ]; then continue; fi
+
+	if [ "$variants" -gt 1 ]; then
+		printf '%s%s%s%s  %s%d copies · %d variants%s  %sDIVERGED%s\n' \
+			"$gap" "$BOLD" "$name" "$RST" "$DIM" "$copies" "$variants" "$RST" "$RED" "$RST"
+	else
+		[ "$copies" -eq 1 ] && word=copy || word=copies
+		printf '%s%s%s%s  %s%d %s%s  %sok%s\n' \
+			"$gap" "$BOLD" "$name" "$RST" "$DIM" "$copies" "$word" "$RST" "$GRN" "$RST"
+	fi
+	[ "$list_paths" -eq 0 ] && continue
+
+	awk -F'\t' -v want="$name" '$1==want' "$tmp/sorted.tsv" > "$tmp/skill.tsv"
+	prev_hash=""
+	while IFS="$TAB" read -r n h mtime nfiles bytes path; do
+		if [ "$h" != "$prev_hash" ]; then
+			when=$(date -r "$mtime" '+%Y-%m-%d %H:%M' 2>/dev/null || echo '?')
+			[ "$nfiles" -eq 1 ] && fw=file || fw=files
+			marker=" "
+			[ "$variants" -gt 1 ] && marker="${YEL}•${RST}"
+			printf '  %s %s%s%s  %s%d %s · %s · newest %s%s\n' \
+				"$marker" "$BOLD" "$h" "$RST" "$DIM" \
+				"$nfiles" "$fw" "$(human_bytes "$bytes")" "$when" "$RST"
+			prev_hash="$h"
+		fi
+		printf '      %s\n' "$(tilde "$path")"
+	done < "$tmp/skill.tsv"
+done < "$tmp/counts.tsv"
+
+printf '\n%s─────%s\n' "$DIM" "$RST"
+if [ "$total_diverged" -gt 0 ]; then
+	[ "$total_skills" -eq 1 ] && sw=skill || sw=skills
+	printf '%d %s · %d copies · %s%d diverged%s\n' "$total_skills" "$sw" \
+		"$total_copies" "$RED" "$total_diverged" "$RST"
+	printf '%sinspect: skills-inventory --diff <skill>%s\n' "$DIM" "$RST"
+else
+	[ "$total_skills" -eq 1 ] && sw=skill || sw=skills
+	printf '%d %s · %d copies · %sall copies in sync%s\n' \
+		"$total_skills" "$sw" "$total_copies" "$GRN" "$RST"
+fi
+exit 0
