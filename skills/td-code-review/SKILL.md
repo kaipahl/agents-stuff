@@ -6,7 +6,7 @@ I want a code review with the "td - Task Management for AI Agents" workflow (**c
 
 See [td-implementation-standards.md](../td-shared/td-implementation-standards.md) for the implementation standards in TD-workflows.
 
-When practical, use subagents for code reviews.
+If you deem it useful, deploy subagents. Give the subagents a defined scope (to avoid scope creep):
 
 - _Codebase Explorer_ for code/docs. Reads specifically the affected files, neighboring code, and docs/plan, reports only evidenced risks
 - _Test Reviewer_ for coverage. Checks acceptance criteria against tests, edge cases, regressions, and whether the correct check was run.
