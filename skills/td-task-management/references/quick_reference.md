@@ -35,10 +35,10 @@
 - `cat body.md | td update <id> --append --description-file -` - Append rich markdown from stdin
 - `td list` - List all issues
 - `td list --status in_progress` - Filter by status
-- `td show <id>` - View issue details
+- `td show <id> --short` - View issue details per default
+- `td show <id> --long` - View issue details for the full context. Preferable only to use for the issue to be implemented
 - `td next` - Highest priority open issue
 - `td current` - What you're working on
-- `td context <id>` - Full context for resuming
 - `td critical-path` - What unblocks the most work
 - `td reviewable` - Issues you can review
 - `td block <id>` - Mark issue as blocked

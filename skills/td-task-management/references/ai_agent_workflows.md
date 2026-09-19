@@ -98,7 +98,8 @@ When it's your turn to review:
 td reviewable
 
 # 2. Look at the issue details
-td show td-a1b2
+td show td-a1b2 --long
+td show td-a1b2 --short for a summary
 
 # 3. Approve or reject
 td approve td-a1b2

@@ -94,8 +94,8 @@ Next session will see all this context with `td usage` or `td context <id>`.
 td reviewable
 
 # 2. Check details
-td show <id>
-td context <id>
+`td show <id> --short` as default
+`td show <id> --long` for the issue to be implemented, delivering detailed output
 
 # 3. Approve or reject
 # Independent review:
