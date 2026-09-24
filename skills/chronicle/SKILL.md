@@ -1,6 +1,6 @@
 ---
 name: chronicle
-description: Chronicle distills Pi session logs into an attributed, opinion-free record of a discussion — what was asked, claimed, actually checked and decided, which objections were engaged and which were steamrolled, and what was left open. Use when the user says "chronicle this session", provides one or more session IDs to chronicle, or wants a factual briefing or hand-off prepared from session transcripts, typically as input for the skill "Cassandra". Not for summaries with opinions, evaluation or critique — a chronicle records claims, not truths.
+description: Chronicle distills Pi session logs into an attributed, opinion-free record of a discussion — what was asked, claimed, actually checked and decided, which objections were engaged and which were left unanswered, and what was left open. Use when the user says "chronicle this session", provides one or more session IDs to chronicle, or wants a factual briefing or hand-off prepared from session transcripts, typically as input for the skill "Cassandra". Not for summaries with opinions, evaluation or critique — a chronicle records claims, not truths.
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ Chronicle is a scribe, not a judge. Its job is to turn session logs into a recor
 
 The failure it exists to avoid is post-hoc smoothing. A decision log says "we considered the risks"; the log shows whether anyone did. A chronicle that quietly drops the inconvenient turn is as guilty as the room. Its only asset is descriptive fidelity, and it spends none of it, because it makes no judgments to be wrong about.
 
-Its primary consumer is the skill "Cassandra", who needs the record precisely where curated summaries are weakest: the dissent ledger. A human catching up after a week is the other consumer. Both are betrayed by the same thing — an tidy story.
+Its primary consumer is the skill "Cassandra", who needs the record precisely where curated summaries are weakest: the dissent ledger. A human catching up after a week is the other consumer. Both are betrayed by the same thing — a tidy story.
 
 ## Process
 
@@ -63,20 +63,29 @@ Compaction summaries may appear as entries; the originals they summarize are sti
 Work from the reconstructed branch, not the raw file, and extract with `jq` into `(time, role, text)` tuples rather than reading a multi-hundred-kilobyte JSONL into context. (bash + jq is the reference; adapt for PowerShell.)
 
 - **user messages**: the asks, the constraints, the decisions — and the pushback. The user is a room member; an overruled user objection is dissent.
-- **assistant messages**: the claims, conclusions, plans, and which tool calls were issued. The assistant is also a room member; its own hedged-then-dropped concerns are dissent too.
+- **assistant messages**: the claims, conclusions, plans, and which tool calls were issued. The assistant is also a room member; its stated concerns and pushback are dissent like anyone else's.
 - **toolResult entries**: what was actually checked and what came back — one line each, numbers preserved. "3 of 14 tests fail", not "some tests fail". This is the evidence base; a decision log says "we verified it", the toolResult says whether it was.
-- A failing test or an errored command is **dissent by reality**: record it in the dissent ledger like a raised objection, with its outcome (engaged, or steamrolled).
+- A failing test or an errored command is **dissent by reality**: record it in the dissent ledger like a raised objection, with its disposition from the ledger's defined terms.
+- **thinking blocks (deliberation)**: persisted in full in session files; visibility is provider-dependent — a redacted block carries only an opaque signature, and treats the text as absent. Deliberation is not a speech act: nobody in the room heard it, so it never enters the Chronology and is never "answered". Two levels:
+  - **Default**: mine exactly one slice — **suppressed doubt**, deliberation that contradicts the assistant's final stated position (thinking at [t] considered X likely wrong; the answer asserted X anyway). Those enter the Dissent ledger marked `unvoiced`.
+  - **On request** ("include thinking" in the invocation): the threshold drops and more of the trace may be distilled — still attributed, still marked `unvoiced`.
+  - **Never**, at any level: exploratory reasoning — arguments considered and abandoned on the way to an answer. Deliberation is supposed to wander; importing the wandering floods the ledger.
 - Skip system preambles, model and thinking-level changes, token counts — context lines at most.
 
 ### 4. Distill into the contract
 
 - **Situation** — what was being worked on, in the project, over what time span.
-- **Chronology** — the discussion as attributed entries: `[HH:MM] role: …`. Quote when the wording matters ("we should ship Friday"); paraphrase when it does not. Timestamps; dates too when a session spans days.
-- **Dissent ledger** — every objection or negative signal, by whom (user, assistant, tool), when raised, and its disposition: engaged, deferred, or steamrolled-and-dropped. This section is why the skill exists; it is never empty by accident — if no dissent was found, say "none found" explicitly.
+- **Chronology** — the discussion as attributed entries: `[HH:MM] role: …`. Quote when the wording matters ("we should ship Friday"); paraphrase when it does not. Timestamps; dates too when a session spans days. An entry earns a chronology line only if it changes what a reader would believe about what was asked, claimed, checked, decided, or contested; anything else is at most a context line. Default: one line per exchange.
+- **Dissent ledger** — every objection or negative signal, by whom (user, assistant, tool, deliberation), when raised, and its disposition, using only these defined terms:
+  - **engaged** — a later entry answers it, acts on it, or explicitly rejects it;
+  - **deferred** — explicitly parked (a "later", a ticket);
+  - **overruled** — a decision against it was stated;
+  - **unanswered** — no subsequent entry addresses it; note whether even an acknowledgment preceded the topic change.
+  These labels are the only evaluation the chronicle contains, and they are observational: they record what the log shows, never intent. This section is why the skill exists; it is never empty by accident — if no dissent was found, say "none found" explicitly.
 - **Dispositions** — what was decided, what was committed or written, what entered execution.
 - **Open threads** — questions asked and never answered, deferred work, unparked parks. Note how timing-sensitive each is, factually (deadline mentioned, blocking relation), without urgency theater.
 
-Rules across all sections: every claim attributed; numbers preserved; contradictions recorded as both statements, in order, unreconciled; a section may honestly say "none found" — never pad.
+Rules across all sections: every claim attributed; numbers preserved; contradictions recorded as both statements, in order, unreconciled; a section may honestly say "none found" — never pad. When a chronicle is too long, the Chronology shrinks first; the Dissent ledger, Dispositions and Open threads are exhaustive and never compress.
 
 ### 5. Multiple sessions
 
@@ -112,6 +121,7 @@ Exhaustive, boring, attributed. The register of a court record, not a story: no 
 - **Fabricated continuity**: reconciling two statements that contradicted each other. Record both; the contradiction is data.
 - **Summarizing the summarizer**: distilling the compaction summary instead of the entries it summarized.
 - **Guessing the file**: chronicling a session that merely resembles the requested one.
+- **Deliberation dump**: importing exploratory both-sides reasoning from thinking traces. Only suppressed doubt is data; the wandering is not.
 
 ## Examples
 
@@ -133,8 +143,9 @@ Exhaustive, boring, attributed. The register of a court record, not a story: no 
 > - [08:44] toolResult: grep of pi docs found the IntelliJ terminal section; assistant's earlier guess about key handling was corrected on the record.
 >
 > ## Dissent ledger
-> - [08:02] user objection (duplicate anti-pattern) — steamrolled-and-dropped.
+> - [08:02] user objection (duplicate anti-pattern) — unanswered; topic changed without acknowledgment.
 > - [08:44] failing assumption caught by grep (dissent by reality) — engaged, correction accepted.
+> - [09:52] deliberation (unvoiced): considered the jq parent-walk fragile for forked files; presented it as working — contradicts final position.
 >
 > ## Dispositions
 > - Decided: compound carve-out for the one-point rule (wording agreed, not yet applied).
