@@ -66,7 +66,7 @@ Work from the reconstructed branch, not the raw file, and extract with `jq` into
 - **assistant messages**: the claims, conclusions, plans, and which tool calls were issued. The assistant is also a room member; its stated concerns and pushback are dissent like anyone else's.
 - **toolResult entries**: what was actually checked and what came back — one line each, numbers preserved. "3 of 14 tests fail", not "some tests fail". This is the evidence base; a decision log says "we verified it", the toolResult says whether it was.
 - A failing test or an errored command is **dissent by reality**: record it in the dissent ledger like a raised objection, with its disposition from the ledger's defined terms.
-- **thinking blocks (deliberation)**: persisted in full in session files; visibility is provider-dependent — a redacted block carries only an opaque signature, and treats the text as absent. Deliberation is not a speech act: nobody in the room heard it, so it never enters the Chronology and is never "answered". Two levels:
+- **thinking blocks (deliberation)**: persisted in full in session files; visibility is provider-dependent — a redacted block carries only an opaque signature; treat its text as absent. Deliberation is not a speech act: nobody in the room heard it, so it never enters the Chronology and is never "answered". Two levels:
   - **Default**: mine exactly one slice — **suppressed doubt**, deliberation that contradicts the assistant's final stated position (thinking at [t] considered X likely wrong; the answer asserted X anyway). Those enter the Dissent ledger marked `unvoiced`.
   - **On request** ("include thinking" in the invocation): the threshold drops and more of the trace may be distilled — still attributed, still marked `unvoiced`.
   - **Never**, at any level: exploratory reasoning — arguments considered and abandoned on the way to an answer. Deliberation is supposed to wander; importing the wandering floods the ledger.
@@ -81,6 +81,9 @@ Work from the reconstructed branch, not the raw file, and extract with `jq` into
   - **deferred** — explicitly parked (a "later", a ticket);
   - **overruled** — a decision against it was stated;
   - **unanswered** — no subsequent entry addresses it; note whether even an acknowledgment preceded the topic change.
+
+  If the decision against it was implicit — carried only by later action, never stated — mark it unanswered, not overruled, and note that the action ran contrary.
+
   These labels are the only evaluation the chronicle contains, and they are observational: they record what the log shows, never intent. This section is why the skill exists; it is never empty by accident — if no dissent was found, say "none found" explicitly.
 - **Dispositions** — what was decided, what was committed or written, what entered execution.
 - **Open threads** — questions asked and never answered, deferred work, unparked parks. Note how timing-sensitive each is, factually (deadline mentioned, blocking relation), without urgency theater.
